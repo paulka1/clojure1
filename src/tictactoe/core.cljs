@@ -6,23 +6,16 @@
 (enable-console-print!)
 
 (defn make-morpion []
-  (vec (take 3 (repeat 0))))
+  (vec (take 3 (repeat "B"))))
 
 (defn new-board [n]
-  (vec (repeat n (vec (repeat n 0)))))
+  (vec (repeat n (vec (repeat n "B")))))
 
 (defonce app-state (atom {:text "TIC TAC TOE"
-                          :board (new-board 3)}))
+                          :board (new-board "B")}))
 
-;(defn computer-move []
-;      (swap! app-state assoc-in [:board @app-state]
-;             remaining-spots (for [i (range board-size)
-;                                   j (range board-size)
-;                                   :when (= (get-in board [j i])2)]
-;                                  [i j])
-;                                  move (rand-nth remaining-spots)
-;                                  path (into [:board] (reverse move))s
-;                                  (swap! app-state assoc-in path 2)))
+(defn computer-move []
+      (swap! app-state assoc-in [:board 0 0] "C"))
 
 (def header-links
   [:div#header-links
@@ -40,8 +33,8 @@
         :y (+ 0.05 j)
         :on-click
         (fn rect-click [e]
-            (swap! app-state update-in [:board j i]inc)
-            ;(computer-move)
+            (swap! app-state update-in [:board j i] (fn[b] "P"))
+            (computer-move)
             )}])
 
 (defn circle [i j]
@@ -74,9 +67,9 @@
         (for [i (range (count (:board @app-state)))
               j (range (count (:board @app-state)))]
              (case (get-in @app-state [:board j i])
-                   0 [blank i j]
-                   1 [circle i j]
-                   2 [cross i j])))
+                   "B" [blank i j]
+                   "P" [circle i j]
+                   "C" [cross i j])))
        [:p
         [:button#newGame
          {
