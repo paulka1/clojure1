@@ -37,17 +37,17 @@
   (- 3 player))
 
 (defn winning-morpion? [plateau]
-  (defn test [a b c] (and (not= a 0) (= a b) (= a c)))
-  (or (test (get-case-morpion plateau 0 0)  (get-case-morpion plateau 0 1)  (get-case-morpion plateau 0 2))
-      (test (get-case-morpion plateau 1 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 1 2))
-      (test (get-case-morpion plateau 2 0)  (get-case-morpion plateau 2 1)  (get-case-morpion plateau 2 2))
+  (defn test-win [a b c] (and (not= a 0) (= a b) (= a c)))
+  (or (test-win (get-case-morpion plateau 0 0)  (get-case-morpion plateau 0 1)  (get-case-morpion plateau 0 2))
+      (test-win (get-case-morpion plateau 1 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 1 2))
+      (test-win (get-case-morpion plateau 2 0)  (get-case-morpion plateau 2 1)  (get-case-morpion plateau 2 2))
 
-      (test (get-case-morpion plateau 0 0)  (get-case-morpion plateau 1 0)  (get-case-morpion plateau 2 0))
-      (test (get-case-morpion plateau 0 1)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 2 1))
-      (test (get-case-morpion plateau 0 2)  (get-case-morpion plateau 1 2)  (get-case-morpion plateau 2 2))
+      (test-win (get-case-morpion plateau 0 0)  (get-case-morpion plateau 1 0)  (get-case-morpion plateau 2 0))
+      (test-win (get-case-morpion plateau 0 1)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 2 1))
+      (test-win (get-case-morpion plateau 0 2)  (get-case-morpion plateau 1 2)  (get-case-morpion plateau 2 2))
 
-      (test (get-case-morpion plateau 0 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 2 2))
-      (test (get-case-morpion plateau 2 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 0 2))))
+      (test-win (get-case-morpion plateau 0 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 2 2))
+      (test-win (get-case-morpion plateau 2 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 0 2))))
 
 (defn new-board [n]
   (vec (repeat n (vec (repeat n 0)))))
@@ -86,8 +86,11 @@
         (fn rect-click [e]
           (swap! app-state update-in [:board j i] inc)
           (swap! app-state assoc-in [:test] (set-case-morpion (:test @app-state) (:player @app-state) i j))
+          (print (winning-morpion? (:test @app-state)))
+          (print (:player @app-state))
+          (when (winning-morpion? (:test @app-state)) (swap! app-state assoc-in [:text] "player win"))
           (swap! app-state assoc-in [:player] (exchange (:player @app-state)))
-          (print-morpion (:test @app-state))
+
             ;(computer-move)
           )}])
 
