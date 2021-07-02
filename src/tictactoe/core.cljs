@@ -125,7 +125,8 @@
          {
           :on-click
           (fn new-game-click [e]
-              (swap! app-state assoc :board (make-morpion)))
+            (swap! app-state assoc :board (make-morpion))
+            (swap! app-state assoc-in [:win] false))
           } "NEW GAME"]]])
 
 (rd/render [tictactoe]
