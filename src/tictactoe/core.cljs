@@ -18,6 +18,16 @@
 (defonce app-state (atom {:text "TIC TAC TOE!"
                           :board (new-board 3)}))
 
+(def header-links
+  [:div#header-links
+   " | "
+   [:a {:href "/"} "new game"]
+   " | "
+   [:a {:href "/"} "1vs1"]
+   " | "
+   [:a {:href "/game_machine"} "1vsMachine"]
+   " ]"])
+
 (defn blank [i j]
       [:rect
        {:width 0.9
@@ -50,8 +60,9 @@
        [:line {:x1 1 :y1 -1 :x2 -1 :y2 1}]])
 
 (defn tictactoe []
-      [:div
-       [:h1 (:text @app-state)]
+      [:div#main
+       header-links
+       [:h1#title (:text @app-state)]
        (into
        [:svg
         {:view-box "0 0 3 3"
@@ -64,7 +75,7 @@
                    1 [circle i j]
                    2 [cross i j])))
        [:p
-        [:button
+        [:button#newGame
          {
           :on-click
           (fn new-game-click [e]

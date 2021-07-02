@@ -1,2 +1,29 @@
 /* some style */
 
+#main {
+    text-align: center
+}
+
+#header-links {
+    text-align: center;
+    padding: 10px;
+}
+a:link {
+    text-decoration: none;
+    color: black;
+}
+
+#title {
+    margin-bottom: 50px;
+    color: black;
+    text-align: center;
+    font-size: 50px;
+}
+
+#newGame {
+    background-color: black;
+    color: white;
+    padding: 15px;
+    border-radius: 15px;
+    border: none;
+}
