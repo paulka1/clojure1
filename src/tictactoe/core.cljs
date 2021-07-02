@@ -55,8 +55,10 @@
                           :player 1
                           :win false
                           :computer false
-                          :coup 0}))
-
+                          :coup 0
+                          :scorePlayer1 0
+                          :scorePlayer2 0
+                          :scoreComputer 0}))
 
 (def header-links
   [:div#header-links
@@ -93,10 +95,19 @@
                 ;; if 1 vs 1
                 (when (false? (:computer @app-state))
                       ((swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
+                       ;; Victory
                         (when (winning-morpion? (:board @app-state))
                           (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
-                          (swap! app-state assoc-in [:win] true))
+                          (swap! app-state assoc-in [:win] true)
 
+                              ;; Score
+                              (case (:player @app-state)
+                                    1 (swap! app-state assoc-in [:scorePlayer1] (inc1 (:scorePlayer1 @app-state)))
+                                    2 (swap! app-state assoc-in [:scorePlayer2] (inc1 (:scorePlayer2 @app-state)))
+                                    )
+                              )
+
+                       ;; match Nul
                        (swap! app-state assoc-in [:coup] (inc1 (:coup @app-state)))
                        (when (draw? (:coup @app-state))
                              (swap! app-state assoc-in [:text] (str "Match Nul"))
@@ -108,38 +119,76 @@
                 ;; if Machine Game
                 (when (true? (:computer @app-state))
                       ((swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
+                       ;; Player Victory
                        (when (winning-morpion? (:board @app-state))
                              (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
-                             (swap! app-state assoc-in [:win] true))
+                             (swap! app-state assoc-in [:win] true)
+                             (swap! app-state assoc-in [:scorePlayer1] (inc1 (:scorePlayer1 @app-state))))
                        (swap! app-state assoc-in [:player] (exchange 1))
 
-                       (computer-move)
-                         ;(when (winning-morpion? (:board @app-state))
-                         ;      (swap! app-state assoc-in [:text] (str "Computer win"))
-                         ;      (swap! app-state assoc-in [:win] true))
+                       (computer-move(:board @app-state))
+                       ;; Computer Victory
+                         (when (winning-morpion? (:board @app-state))
+                               (swap! app-state assoc-in [:text] (str "Computer win"))
+                               (swap! app-state assoc-in [:win] true)
+                               (swap! app-state assoc-in [:scoreComputer] (inc1 (:scoreComputer @app-state))))
+                       ;; Match Nul
+                       (swap! app-state assoc-in [:coup] (inc1 (:coup @app-state)))
+                       (when (draw? (:coup @app-state))
+                             (swap! app-state assoc-in [:text] (str "Match Nul"))
+                             (swap! app-state assoc-in [:win] true)
+                             )
+
                        (swap! app-state assoc-in [:player] (exchange 2))
                        )
                       )
                 ))
         }])
 
-(defn computer-move [e]
-      (def x (atom (rand-int 2)))
-      (def y (atom (rand-int 2)))
-      (print @x)
-      (print @y)
-      (legal-move-morpion (:board @app-state) @x @y)
-      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 0 0))
-      ;(if (legal-move-morpion (:board @app-state) @x @y)
-      ;       (
-      ;        (print "OKKKKK")
-      ;         (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
-      ;        )
-      ;       (
-      ;         (computer-move)
-      ;        )
-      ;  )
+(defn computer-move [board]
+      (print board)
+      (def board-size (count board))
+      (print board-size)
+      (let [remaining-spots (for [i (range board-size)
+                                  :when (= (get-in board [i]) 0)]
+                                 [i])]
+           )
+      ((print remaining-spots))
+      (def pickNumer (rand-nth remaining-spots))
+      ;((print pickNumer))
       )
+
+           ;(if move
+           ;  (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2))
+           ;  (assoc-in board move "2")
+           ;  board)))
+
+;(defn computer-move [e]
+;      (def x (atom (rand-int 2)))
+;      (def y (atom (rand-int 2)))
+;
+;      (if (not (legal-move-morpion? (:board @app-state) @x @y))
+;        (print "ilegallle")
+;        )
+;      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
+;      ;(if (legal-move-morpion? (:board @app-state) @x @y)
+;      ;  (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
+;      ;  (computer-move)
+;      ;  )
+;
+;
+;      ;(legal-move-morpion (:board @app-state) @x @y)
+;      ;(swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 0 0))
+;      ;(if (legal-move-morpion (:board @app-state) @x @y)
+;      ;       (
+;      ;        (print "OKKKKK")
+;      ;         (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
+;      ;        )
+;      ;       (
+;      ;         (computer-move)
+;      ;        )
+;      ;  )
+;      )
 
 (defn legal-move-morpion? [plateau i j]
       (and (>= i 0)
@@ -171,6 +220,9 @@
       [:div#main
        header-links
        [:h1#title (:text @app-state)]
+       [:p {:id "child-one"} "Player 1: " (:scorePlayer1 @app-state)]
+       [:p {:id "child-one"} "Player 2: " (:scorePlayer2 @app-state)]
+       [:p {:id "child-one"} "Computer: " (:scoreComputer @app-state)]
        (into
        [:svg
         {:view-box "0 0 3 3"
