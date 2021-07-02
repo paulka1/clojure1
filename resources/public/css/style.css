@@ -6,13 +6,16 @@
 
 #header-links {
     text-align: center;
-    padding: 10px;
     font-size: 30px;
 }
+
+#a {
+    padding:30px;
+}
+
 a:link {
     text-decoration: none;
     color: black;
-    padding: 10px;
 }
 
 #title {

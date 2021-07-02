@@ -60,7 +60,7 @@
 
 (def header-links
   [:div#header-links
-   [:a {:on-click
+   [:a#a {:on-click
         (fn [b] {
                  (swap! app-state assoc-in [:computer] false)
                  (swap! app-state assoc-in [:win] false)
@@ -68,8 +68,8 @@
                  (swap! app-state assoc :board (make-morpion))
                  })
         }  "1vs1"]
-   " | "
-   [:a {:on-click
+   "  |  "
+   [:a#a {:on-click
         (fn [b] {
                  (swap! app-state assoc-in [:computer] true)
                  (swap! app-state assoc-in [:win] false)
@@ -113,7 +113,7 @@
                              (swap! app-state assoc-in [:win] true))
                        (swap! app-state assoc-in [:player] (exchange 1))
 
-                       ;(computer-move)
+                       (computer-move)
                          ;(when (winning-morpion? (:board @app-state))
                          ;      (swap! app-state assoc-in [:text] (str "Computer win"))
                          ;      (swap! app-state assoc-in [:win] true))
@@ -189,7 +189,10 @@
           (fn new-game-click [e]
             (swap! app-state assoc :board (make-morpion))
             (swap! app-state assoc-in [:win] false)
-            (swap! app-state assoc-in [:text] (str "TIC TAC TOE"))
+            (swap! app-state assoc-in [:computer] false)
+            (swap! app-state assoc-in [:coup] 0)
+            (swap! app-state assoc-in [:player] 1)
+            (swap! app-state assoc-in [:text] (str "1vs1"))
               )
           } "NEW GAME"]]])
 
