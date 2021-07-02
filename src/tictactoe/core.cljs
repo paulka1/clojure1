@@ -5,28 +5,31 @@
 
 (enable-console-print!)
 
-(println "This text is printed from src/tictactoe/core.cljs. Go ahead and edit it and see reloading in action.")
-
-;; define your app data so that it doesn't get over-written on reload
-
 (defn make-morpion []
   (vec (take 3 (repeat 0))))
 
 (defn new-board [n]
   (vec (repeat n (vec (repeat n 0)))))
 
-(defonce app-state (atom {:text "TIC TAC TOE!"
+(defonce app-state (atom {:text "TIC TAC TOE"
                           :board (new-board 3)}))
+
+;(defn computer-move []
+;      (swap! app-state assoc-in [:board @app-state]
+;             remaining-spots (for [i (range board-size)
+;                                   j (range board-size)
+;                                   :when (= (get-in board [j i])2)]
+;                                  [i j])
+;                                  move (rand-nth remaining-spots)
+;                                  path (into [:board] (reverse move))s
+;                                  (swap! app-state assoc-in path 2)))
 
 (def header-links
   [:div#header-links
-   " | "
-   [:a {:href "/"} "new game"]
-   " | "
    [:a {:href "/"} "1vs1"]
    " | "
    [:a {:href "/game_machine"} "1vsMachine"]
-   " ]"])
+   ])
 
 (defn blank [i j]
       [:rect
@@ -52,7 +55,7 @@
 (defn cross [i j]
       [:g {:stroke "darkred"
            :stroke-width 0.2
-           :stroke-lincap "round"
+           :strokelincap "round"
            :transform
            (str "translate(" (+ 0.5 i) "," (+ 0.5 j) ")"
                 "scale(0.35)")}
@@ -86,7 +89,5 @@
            (. js/document (getElementById "app")))
 
 (defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-   (swap! app-state assoc-in [:text] "TIC TAC TOE!")
+   (swap! app-state assoc-in [:text] "TIC TAC TOE")
 )
