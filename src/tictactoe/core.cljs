@@ -18,6 +18,36 @@
 (defonce app-state (atom {:text "TIC TAC TOE!"
                           :board (new-board 3)}))
 
+(defn blank [i j]
+      [:rect
+       {:width 0.9
+        :height 0.9
+        :fill "grey"
+        :x (+ 0.05 i)
+        :y (+ 0.05 j)
+        :on-click
+        (fn rect-click [e]
+            (swap! app-state update-in [:board j i]inc)
+            ;(computer-move)
+            )}])
+
+(defn circle [i j]
+      [:circle
+       {:r 0.45
+        :fill "green"
+        :cx (+ 0.5 i)
+        :cy (+ 0.5 j)
+        }])
+
+(defn cross [i j]
+      [:g {:stroke "darkred"
+           :stroke-width 0.2
+           :stroke-lincap "round"
+           :transform
+           (str "translate(" (+ 0.5 i) "," (+ 0.5 j) ")"
+                "scale(0.35)")}
+       [:line {:x1 -1 :y1 -1 :x2 1 :y2 1}]
+       [:line {:x1 1 :y1 -1 :x2 -1 :y2 1}]])
 
 (defn tictactoe []
       [:div
@@ -26,22 +56,20 @@
        [:svg
         {:view-box "0 0 3 3"
          :width 500
-         :height 500}
+         :height 500}]
         (for [i (range (count (:board @app-state)))
               j (range (count (:board @app-state)))]
-          [:rect {:width 0.9
-                  :height 0.9
-                  :fill (if (zero? (get-in @app-state [:board j i]))
-                          "red"
-                          "blue")
-                  :x i
-                  :y j
-                  :on-click
-                  (fn rect-click [e]
-                    (prn "you clicked me!" i j)
-                    (prn (:board @app-state))
-                    (prn (swap! app-state assoc-in [:board j i] 1 )))
-                    }])])])
+             (case (get-in @app-state [:board j i])
+                   0 [blank i j]
+                   1 [circle i j]
+                   2 [cross i j])))
+       [:p
+        [:button
+         {
+          :on-click
+          (fn new-game-click [e]
+              (swap! app-state assoc :board (new-board 3)))
+          } "NEW GAME"]]])
 
 (rd/render [tictactoe]
            (. js/document (getElementById "app")))
