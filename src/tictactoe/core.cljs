@@ -88,7 +88,7 @@
           (swap! app-state assoc-in [:test] (set-case-morpion (:test @app-state) (:player @app-state) i j))
           (print (winning-morpion? (:test @app-state)))
           (print (:player @app-state))
-          (when (winning-morpion? (:test @app-state)) (swap! app-state assoc-in [:text] "player win"))
+          (when (winning-morpion? (:test @app-state)) (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win")))
           (swap! app-state assoc-in [:player] (exchange (:player @app-state)))
 
             ;(computer-move)
