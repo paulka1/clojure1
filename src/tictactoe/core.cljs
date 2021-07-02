@@ -53,20 +53,10 @@
   (vec (repeat n (vec (repeat n 0)))))
 
 (defonce app-state (atom {:text "TIC TAC TOE"
-                          :board (new-board 3)
-                          :test (make-morpion)
-                          :player 1}))
+                          :board (make-morpion)
+                          :player 1
+                          :win false}))
 
-
-;(defn computer-move []
-;      (swap! app-state assoc-in [:board @app-state]
-;             remaining-spots (for [i (range board-size)
-;                                   j (range board-size)
-;                                   :when (= (get-in board [j i])2)]
-;                                  [i j])
-;                                  move (rand-nth remaining-spots)
-;                                  path (into [:board] (reverse move))s
-;                                  (swap! app-state assoc-in path 2)))
 
 (def header-links
   [:div#header-links
@@ -84,15 +74,18 @@
         :y (+ 0.05 j)
         :on-click
         (fn rect-click [e]
-          (swap! app-state update-in [:board j i] inc)
-          (swap! app-state assoc-in [:test] (set-case-morpion (:test @app-state) (:player @app-state) i j))
-          (print (winning-morpion? (:test @app-state)))
-          (print (:player @app-state))
-          (when (winning-morpion? (:test @app-state)) (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win")))
-          (swap! app-state assoc-in [:player] (exchange (:player @app-state)))
+          (when (false? (:win @app-state))
+            (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
+            (print (winning-morpion? (:board @app-state)))
+            (print (:player @app-state))
+            (when (winning-morpion? (:board @app-state))
+              (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
+              (swap! app-state assoc-in [:win] true)
+            )
+            (swap! app-state assoc-in [:player] (exchange (:player @app-state)))
 
             ;(computer-move)
-          )}])
+          ))}])
 
 (defn circle [i j]
       [:circle
@@ -123,7 +116,7 @@
          :height 500}]
         (for [i [0 1 2]
               j [0 1 2]]
-             (case (get-case-morpion (:test @app-state) i j)
+             (case (get-case-morpion (:board @app-state) i j)
                    0 [blank i j]
                    1 [circle i j]
                    2 [cross i j])))
