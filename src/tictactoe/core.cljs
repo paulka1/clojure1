@@ -21,6 +21,9 @@
 (defn set-case-morpion [plateau player i j]
   (assoc plateau (+ i (* 3 j)) player))
 
+(defn clean-case-morpion [plateau i j]
+  (assoc plateau (+ i (* 3 j)) 0))
+
 (defn exchange [player]
   (- 3 player))
 
@@ -40,15 +43,16 @@
       (test-win (get-case-morpion plateau 0 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 2 2))
       (test-win (get-case-morpion plateau 2 0)  (get-case-morpion plateau 1 1)  (get-case-morpion plateau 0 2))))
 
-(defn draw? [coup]
-      (if (= coup 9)
-        true
-        false
-        )
-      )
+(defn legal-move-morpion? [plateau i j]
+  (and (>= i 0)
+       (<= i 2)
+       (>= j 0)
+       (<= j 2)
+       (= (get-case-morpion plateau i j) 0)))
 
-(defn new-board [n]
-  (vec (repeat n (vec (repeat n 0)))))
+(defn end-morpion? [plateau]
+  (empty? (filter (fn [x] (zero? x)) plateau)))
+
 
 (defonce app-state (atom {:text "TIC TAC TOE"
                           :board (make-morpion)
@@ -58,7 +62,10 @@
                           :coup 0
                           :scorePlayer1 0
                           :scorePlayer2 0
-                          :scoreComputer 0}))
+                          :scoreComputer 0
+                          :bestScore -9999
+                          :x -1
+                          :y -1}))
 
 (def header-links
   [:div#header-links
@@ -77,9 +84,23 @@
                  (swap! app-state assoc-in [:win] false)
                  (swap! app-state assoc-in [:text] (str "Vs Machine"))
                  (swap! app-state assoc :board (make-morpion))
+                 (swap! app-state assoc-in [:bestScore] -9999)
+                 (swap! app-state assoc-in [:player] 1)
                  })
         } "1vsMachine"]
    ])
+
+
+(defn computer-move [board]
+  (let [remaining-spots (for [i [0 1 2]
+                              j [0 1 2]
+                              :when (= (get-case-morpion board i j) 0)]
+                          [i j])
+        move (when (seq remaining-spots)
+               (rand-nth remaining-spots))]
+    (when (legal-move-morpion? board (get move 0) (get move 1))
+      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 (get move 0) (get move 1))))))
+
 
 (defn blank [i j]
       [:rect
@@ -91,112 +112,79 @@
         :on-click
         (fn rect-click [e]
           (when (false? (:win @app-state))
-
+                
                 ;; if 1 vs 1
                 (when (false? (:computer @app-state))
-                      ((swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
+                      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
                        ;; Victory
-                        (when (winning-morpion? (:board @app-state))
-                          (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
-                          (swap! app-state assoc-in [:win] true)
+                      (when (winning-morpion? (:board @app-state))
+                         (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
+                         (swap! app-state assoc-in [:win] true)
 
                               ;; Score
-                              (case (:player @app-state)
-                                    1 (swap! app-state assoc-in [:scorePlayer1] (inc1 (:scorePlayer1 @app-state)))
-                                    2 (swap! app-state assoc-in [:scorePlayer2] (inc1 (:scorePlayer2 @app-state)))
-                                    )
-                              )
+                         (case (:player @app-state)
+                           1 (swap! app-state assoc-in [:scorePlayer1] (inc1 (:scorePlayer1 @app-state)))
+                           2 (swap! app-state assoc-in [:scorePlayer2] (inc1 (:scorePlayer2 @app-state)))))
 
                        ;; match Nul
-                       (swap! app-state assoc-in [:coup] (inc1 (:coup @app-state)))
-                       (when (draw? (:coup @app-state))
-                             (swap! app-state assoc-in [:text] (str "Match Nul"))
-                             (swap! app-state assoc-in [:win] true)
-                             )
-                       (swap! app-state assoc-in [:player] (exchange (:player @app-state))) )
-                       )
+                      (when (false? (:win @app-state))
+                        (when (end-morpion? (:board @app-state))
+                           (swap! app-state assoc-in [:text] (str "Match Nul"))
+                           (swap! app-state assoc-in [:win] true)))
+
+                      (swap! app-state assoc-in [:player] (exchange (:player @app-state)))
+            )
 
                 ;; if Machine Game
                 (when (true? (:computer @app-state))
-                      ((swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
+                      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) (:player @app-state) i j))
                        ;; Player Victory
-                       (when (winning-morpion? (:board @app-state))
+                      (when (winning-morpion? (:board @app-state))
                              (swap! app-state assoc-in [:text] (str "Player " (:player @app-state) " win"))
                              (swap! app-state assoc-in [:win] true)
                              (swap! app-state assoc-in [:scorePlayer1] (inc1 (:scorePlayer1 @app-state))))
-                       (swap! app-state assoc-in [:player] (exchange 1))
-
-                       (computer-move(:board @app-state))
+                      (swap! app-state assoc-in [:player] (exchange 1))
+                      (when (false? (winning-morpion? (:board @app-state)))
+                        (computer-move (:board @app-state))
                        ;; Computer Victory
-                         (when (winning-morpion? (:board @app-state))
-                               (swap! app-state assoc-in [:text] (str "Computer win"))
-                               (swap! app-state assoc-in [:win] true)
-                               (swap! app-state assoc-in [:scoreComputer] (inc1 (:scoreComputer @app-state))))
+                        (when (winning-morpion? (:board @app-state))
+                          (swap! app-state assoc-in [:text] (str "Computer win"))
+                          (swap! app-state assoc-in [:win] true)
+                          (swap! app-state assoc-in [:scoreComputer] (inc1 (:scoreComputer @app-state))))
                        ;; Match Nul
-                       (swap! app-state assoc-in [:coup] (inc1 (:coup @app-state)))
-                       (when (draw? (:coup @app-state))
-                             (swap! app-state assoc-in [:text] (str "Match Nul"))
-                             (swap! app-state assoc-in [:win] true)
-                             )
+                        (when (false? (:win @app-state))
+                          (when (end-morpion? (:board @app-state))
+                            (swap! app-state assoc-in [:text] (str "Match Nul"))
+                            (swap! app-state assoc-in [:win] true)))
 
-                       (swap! app-state assoc-in [:player] (exchange 2))
+                        (swap! app-state assoc-in [:player] (exchange 2))
+                        )
+                      
                        )
-                      )
+                      
                 ))
         }])
+;; (defn minimax [board depth isMaximizing]
+;;   ()
+;;   )
 
-(defn computer-move [board]
-      (print board)
-      (def board-size (count board))
-      (print board-size)
-      (let [remaining-spots (for [i (range board-size)
-                                  :when (= (get-in board [i]) 0)]
-                                 [i])]
-           )
-      ((print remaining-spots))
-      (def pickNumer (rand-nth remaining-spots))
-      ;((print pickNumer))
-      )
-
-           ;(if move
-           ;  (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2))
-           ;  (assoc-in board move "2")
-           ;  board)))
-
-;(defn computer-move [e]
-;      (def x (atom (rand-int 2)))
-;      (def y (atom (rand-int 2)))
-;
-;      (if (not (legal-move-morpion? (:board @app-state) @x @y))
-;        (print "ilegallle")
-;        )
-;      (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
-;      ;(if (legal-move-morpion? (:board @app-state) @x @y)
-;      ;  (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
-;      ;  (computer-move)
-;      ;  )
-;
-;
-;      ;(legal-move-morpion (:board @app-state) @x @y)
-;      ;(swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 0 0))
-;      ;(if (legal-move-morpion (:board @app-state) @x @y)
-;      ;       (
-;      ;        (print "OKKKKK")
-;      ;         (swap! app-state assoc-in [:board] (set-case-morpion (:board @app-state) 2 @x @y))
-;      ;        )
-;      ;       (
-;      ;         (computer-move)
-;      ;        )
-;      ;  )
-;      )
-
-(defn legal-move-morpion? [plateau i j]
-      (and (>= i 0)
-           (<= i 2)
-           (>= j 0)
-           (<= j 2)
-           (= (get-case-morpion plateau i j) 0)))
-
+;; (defn AI-move []
+;;   (swap! app-state assoc-in [:bestScore] -9999)
+;;   (swap! app-state assoc-in [:x] -1)
+;;   (swap! app-state assoc-in [:y] -1)
+;;   (for [i [0 1 2]
+;;        j [0 1 2]]
+;;        (when (legal-move-morpion? (:board @app-state) i j)
+;;          (set-case-morpion (:board @app-state) 2 i j)
+;;          (def score (minimax (:board @app-state) 0 true))
+;;          (clean-case-morpion (:board @app-state) i j)
+;;          (when (> score (:bestScore @app-state))
+;;            (swap! app-state assoc-in [:bestScore] score)
+;;            (swap! app-state assoc-in [:x] i)
+;;            (swap! app-state assoc-in [:y] j))
+;;        )
+;;   )
+;; )
 
 (defn circle [i j]
       [:circle
