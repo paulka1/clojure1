@@ -1,12 +1,39 @@
 /* some style */
 
 #main {
-    text-align: center
+    text-align: center;
+    cursor: pointer;
 }
 
 #header-links {
     text-align: center;
     font-size: 30px;
+}
+
+#info {
+    margin-bottom: 30px;
+}
+
+#resultatDiv {
+    border: 5px solid grey;
+    border-radius: 15px;
+    width:300px;
+}
+
+#playerDiv {
+    border: 5px solid grey;
+    border-radius: 15px;
+    width:300px;
+    float: right;
+}
+
+.resultTitle {
+    font-size: 35px;
+    margin-top: 10px;
+}
+
+.result {
+    font-size: 15px;
 }
 
 #a {
@@ -30,4 +57,5 @@ a:link {
     padding: 15px;
     border-radius: 15px;
     border: none;
+    cursor: pointer;
 }

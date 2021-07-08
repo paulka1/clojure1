@@ -13,3 +13,5 @@ Pour lancer l'application lancer la commande :
     lein figwheel
 
 Une page de votre navigateur devrait s'ouvrir à l'adresse [localhost:3449](http://localhost:3449/)
+
+La branche final est la branche : rendu_clojure
