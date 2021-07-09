@@ -64,7 +64,8 @@
                           :scorePlayer2  0
                           :scoreComputer 0
                           :bestScore     -9999
-                          :player1Name   "player 1"
+                          :player1Name   "Player 1"
+                          :player2Name   "Player 2"
                           :x             -1
                           :y             -1}))
 
@@ -210,25 +211,38 @@
 ;;   ([name] (text-field name nil))
 ;;    ([name value] (input-field name value)))
 
+(defn inputName [name]
+      (print name)
+      (swap! app-state assoc-in [:player1Name] name)
+      (print (:player1Name @app-state))
+      )
+
+(defn row [label input]
+      [:div.row
+       [:div.col-md-2 [:label label]]
+       [:div.col-md-5 input]])
+
+(defn input [label type id]
+      (row label [:input.form-control {:field type :id id}]))
+
 (defn tictactoe []
       [:div#main
        header-links
        [:h1#title (:text @app-state)]
        [:div#info
         [:div#playerDiv [:p.resultTitle "Your Name"]
-         [:p.result {:id "child-one"} "Player 1: "]
-         ;;  (text-field (:player1Name @app-state) "paul")
-         [:input
-         ;;        {  }
-          ]
-          [:p.result {:id "child-one"} "Player 2: "]
-          [:input
-         ;;     {     }
-           ]
+         (input "Player 1" :text :player1Name)
+         (input "Player 2" :text :player2Name)
+         [:button.btn
+          {:on-click
+           #(if (empty? (swap! app-state assoc-in [:player1Name] "pol")(swap! app-state assoc-in [:player2Name] "Than"))
+              (swap! app-state assoc-in [:error :player1Name]
+                     "is empty"))}
+          "save"]
          ]
         [:div#resultatDiv [:p.resultTitle "Ranking"]
-         [:p.result {:id "child-one"} "Player 1: " (:scorePlayer1 @app-state)]
-         [:p.result {:id "child-one"} "Player 2: " (:scorePlayer2 @app-state)]
+         [:p.result {:id "child-one"} (:player1Name @app-state) " : " (:scorePlayer1 @app-state)]
+         [:p.result {:id "child-one"} (:player2Name @app-state) " : "  (:scorePlayer2 @app-state)]
          [:p.result {:id "child-one"} "Computer: " (:scoreComputer @app-state)]
          ]
         ]
