@@ -211,11 +211,11 @@
 ;;   ([name] (text-field name nil))
 ;;    ([name value] (input-field name value)))
 
-(defn inputName [name]
-      (print name)
-      (swap! app-state assoc-in [:player1Name] name)
-      (print (:player1Name @app-state))
-      )
+;;(defn inputName [name]
+;;      (print name)
+;;      (swap! app-state assoc-in [:player1Name] name)
+;;      (print (:player1Name @app-state))
+;;      )
 
 (defn row [label input]
       [:div.row
@@ -234,11 +234,13 @@
          (input "Player 1" :text :player1Name)
          (input "Player 2" :text :player2Name)
          [:button.btn
-          {:on-click
-           #(if (empty? (swap! app-state assoc-in [:player1Name] "pol")(swap! app-state assoc-in [:player2Name] "Than"))
-              (swap! app-state assoc-in [:error :player1Name]
-                     "is empty"))}
-          "save"]
+          ;;         {:on-click
+          ;;         (fn saveName [e]
+          ;;             (swap! app-state assoc-in [:player1Name] "paul")
+          ;;              (swap! app-state assoc-in [:player2Name] "than")
+          ;;            )
+          ;;         }
+           "save"]
          ]
         [:div#resultatDiv [:p.resultTitle "Ranking"]
          [:p.result {:id "child-one"} (:player1Name @app-state) " : " (:scorePlayer1 @app-state)]
